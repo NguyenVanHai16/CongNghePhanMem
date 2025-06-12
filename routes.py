@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime, date, timedelta
 from flask import render_template, redirect, url_for, flash, request, Response
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
@@ -2034,6 +2035,7 @@ def admin_bookings():
     )
 
     return render_template('messages/shop_chat.html', customer=customer, shop=shop, messages=messages)
+
 
 
 
