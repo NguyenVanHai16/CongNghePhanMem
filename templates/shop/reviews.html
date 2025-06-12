@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Đánh giá - {{ shop.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="shop-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-star me-2"></i>Đánh giá từ khách hàng
+                </h1>
+                <p class="text-muted mb-0">Xem và quản lý đánh giá của tiệm {{ shop.name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('shop_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Rating Overview -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Đánh giá trung bình</h6>
+                    <div class="rating-display">
+                        <h2 class="text-warning mb-0">{{ "%.1f"|format(shop.average_rating) }}</h2>
+                        <div class="stars mt-2">
+                            {% for i in range(5) %}
+                                {% if i < shop.average_rating|int %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% elif i < shop.average_rating|round(0, 'ceil')|int and (shop.average_rating - shop.average_rating|int) >= 0.5 %}
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="small text-muted mt-2">
+                            Dựa trên {{ reviews|length }} đánh giá
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">Phân bố đánh giá</h6>
+                    {% for i in range(5, 0, -1) %}
+                        {% set count = rating_counts.get(i, 0) %}
+                        {% set percentage = (count / reviews|length * 100) if reviews|length > 0 else 0 %}
+                        <div class="rating-bar mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="rating-label me-2">{{ i }} <i class="fas fa-star text-warning small"></i></div>
+                                <div class="progress flex-grow-1" style="height: 10px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ percentage }}%"></div>
+                                </div>
+                                <div class="rating-count ms-2">{{ count }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Danh sách đánh giá</h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary">{{ reviews|length }} đánh giá</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if reviews %}
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                        <div class="review-item p-3 mb-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stars mb-2">
+                                        {% for i in range(5) %}
+                                            {% if i < review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <h6 class="mb-1">{{ review.customer.full_name }}</h6>
+                                    <div class="text-muted small">{{ review.created_at.strftime('%d/%m/%Y') }}</div>
+                                </div>
+                                <div>
+                                    {% if not review.is_approved %}
+                                        <span class="badge bg-warning">Chờ duyệt</span>
+                                    {% endif %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="reviewActions{{ review.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="reviewActions{{ review.id }}">
+                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#replyModal{{ review.id }}">Phản hồi</a></li>
+                                            {% if not review.is_approved %}
+                                                <li><a class="dropdown-item" href="{{ url_for('approve_review', review_id=review.id) }}">Duyệt đánh giá</a></li>
+                                            {% endif %}
+                                            <li><a class="dropdown-item text-danger" href="{{ url_for('delete_review', review_id=review.id) }}" onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">Xóa</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="review-content mt-3">
+                                <p>{{ review.comment }}</p>
+                            </div>
+                            {% if review.shop_response %}
+                                <div class="shop-response mt-3 p-3 bg-light rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-reply text-primary me-2"></i>
+                                        <strong>Phản hồi từ chủ tiệm:</strong>
+                                    </div>
+                                    <p class="mb-0">{{ review.shop_response }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Reply Modal -->
+                            <div class="modal fade" id="replyModal{{ review.id }}" tabindex="-1" aria-labelledby="replyModalLabel{{ review.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="replyModalLabel{{ review.id }}">Phản hồi đánh giá</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{{ url_for('reply_to_review', review_id=review.id) }}" method="post">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="shopResponse{{ review.id }}" class="form-label">Phản hồi của bạn</label>
+                                                    <textarea class="form-control" id="shopResponse{{ review.id }}" name="shop_response" rows="4" required>{{ review.shop_response or '' }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-primary">Gửi phản hồi</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-star text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3">Chưa có đánh giá nào từ khách hàng.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

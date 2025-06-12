@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết lịch đặt #{{ booking.id }} - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">
+                    <i class="fas fa-calendar-check me-2"></i>Chi tiết lịch đặt #{{ booking.id }}
+                </h1>
+                <a href="{{ url_for('admin_bookings') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+            <p class="text-muted">Xem thông tin chi tiết về lịch đặt</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Booking Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin lịch đặt</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">ID:</div>
+                        <div class="col-md-8">{{ booking.id }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Ngày đặt:</div>
+                        <div class="col-md-8">{{ booking.booking_date.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Giờ đặt:</div>
+                        <div class="col-md-8">{{ booking.booking_time.strftime('%H:%M') }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Trạng thái:</div>
+                        <div class="col-md-8">
+                            {% if booking.status == 'pending' %}
+                                <span class="badge bg-warning">Chờ xác nhận</span>
+                            {% elif booking.status == 'confirmed' %}
+                                <span class="badge bg-success">Đã xác nhận</span>
+                            {% elif booking.status == 'completed' %}
+                                <span class="badge bg-info">Hoàn thành</span>
+                            {% elif booking.status == 'cancelled' %}
+                                <span class="badge bg-danger">Đã hủy</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Ngày tạo:</div>
+                        <div class="col-md-8">{{ booking.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Ghi chú:</div>
+                        <div class="col-md-8">{{ booking.notes or 'Không có ghi chú' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin dịch vụ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Dịch vụ:</div>
+                        <div class="col-md-8">{{ booking.service.name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Giá:</div>
+                        <div class="col-md-8">{{ "{:,}".format(booking.service.price) }} VNĐ</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Thời gian:</div>
+                        <div class="col-md-8">{{ booking.service.duration }} phút</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Mô tả:</div>
+                        <div class="col-md-8">{{ booking.service.description or 'Không có mô tả' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer and Shop Info -->
+        <div class="col-lg-4">
+            <!-- Customer Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin khách hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-placeholder me-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ booking.customer.full_name }}</h6>
+                            <p class="text-muted small mb-0">{{ booking.customer.email }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4 fw-bold">SĐT:</div>
+                        <div class="col-md-8">{{ booking.customer.phone or 'Chưa cập nhật' }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4 fw-bold">Ngày tham gia:</div>
+                        <div class="col-md-8">{{ booking.customer.created_at.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('admin_edit_user', user_id=booking.customer.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-user-edit me-1"></i>Xem hồ sơ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shop Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin tiệm</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar-placeholder me-3">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ booking.shop.name }}</h6>
+                            <p class="text-muted small mb-0">{{ booking.shop.phone }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4 fw-bold">Địa chỉ:</div>
+                        <div class="col-md-8">{{ booking.shop.address }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4 fw-bold">Chủ tiệm:</div>
+                        <div class="col-md-8">{{ booking.shop.owner.full_name }}</div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('shop_detail', shop_id=booking.shop.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-store me-1"></i>Xem tiệm
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Thao tác</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if booking.status == 'pending' %}
+                        <a href="{{ url_for('confirm_booking', booking_id=booking.id) }}" 
+                           class="btn btn-success"
+                           onclick="return confirm('Bạn có chắc muốn xác nhận lịch đặt này?')">
+                            <i class="fas fa-check me-1"></i>Xác nhận lịch đặt
+                        </a>
+                        {% endif %}
+                        
+                        {% if booking.status == 'confirmed' %}
+                        <a href="{{ url_for('complete_booking', booking_id=booking.id) }}" 
+                           class="btn btn-primary"
+                           onclick="return confirm('Bạn có chắc muốn đánh dấu lịch đặt này là hoàn thành?')">
+                            <i class="fas fa-check-double me-1"></i>Đánh dấu hoàn thành
+                        </a>
+                        {% endif %}
+                        
+                        {% if booking.status in ['pending', 'confirmed'] %}
+                        <a href="{{ url_for('cancel_booking_request', booking_id=booking.id) }}" 
+                           class="btn btn-danger"
+                           onclick="return confirm('Bạn có chắc muốn hủy lịch đặt này?')">
+                            <i class="fas fa-times me-1"></i>Hủy lịch đặt
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_styles %}
+<style>
+    .avatar-placeholder {
+        width: 40px;
+        height: 40px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% endblock %}

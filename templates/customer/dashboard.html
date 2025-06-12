@@ -1,0 +1,28 @@
+<!-- Thêm nút tin nhắn vào menu -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('customer_bookings') }}" class="btn btn-outline-primary">
+                <i class="fas fa-calendar-check me-1"></i>Lịch đặt của tôi
+            </a>
+            <a href="{{ url_for('all_conversations') }}" class="btn btn-outline-primary">
+                <i class="fas fa-comments me-1"></i>Tin nhắn
+            </a>
+            <a href="{{ url_for('favorite_shops') }}" class="btn btn-outline-primary">
+                <i class="fas fa-heart me-1"></i>Tiệm đã lưu
+            </a>
+            <a href="{{ url_for('customer_profile') }}" class="btn btn-outline-primary">
+                <i class="fas fa-user-edit me-1"></i>Thông tin cá nhân
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Nếu có nút hủy lịch hẹn trong dashboard của khách hàng -->
+{% if booking.status in ['pending', 'confirmed'] %}
+<a href="{{ url_for('cancel_booking_request', booking_id=booking.id) }}" 
+   class="btn btn-sm btn-outline-danger"
+   onclick="return confirm('Bạn có chắc muốn hủy lịch hẹn này?')">
+    <i class="fas fa-times-circle"></i> Hủy
+</a>
+{% endif %}

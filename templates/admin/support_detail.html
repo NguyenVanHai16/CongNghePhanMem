@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết hỗ trợ - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Admin Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-ticket-alt me-2"></i>Chi tiết yêu cầu hỗ trợ
+                </h1>
+                <p class="text-muted mb-0">
+                    Yêu cầu #{{ ticket.id }} - 
+                    {% if ticket.status == 'pending' %}
+                    <span class="badge bg-warning">Chờ xử lý</span>
+                    {% else %}
+                    <span class="badge bg-success">Đã giải quyết</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('admin_support') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    <!-- Ticket Details -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin yêu cầu</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID:</strong> {{ ticket.id }}</p>
+                    <p><strong>Tiêu đề:</strong> {{ ticket.subject }}</p>
+                    <p>
+                        <strong>Loại:</strong> 
+                        {% if ticket.type == 'technical' %}
+                        <span class="badge bg-info">Kỹ thuật</span>
+                        {% elif ticket.type == 'billing' %}
+                        <span class="badge bg-warning">Thanh toán</span>
+                        {% elif ticket.type == 'complaint' %}
+                        <span class="badge bg-danger">Khiếu nại</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Khác</span>
+                        {% endif %}
+                    </p>
+                    <p>
+                        <strong>Trạng thái:</strong> 
+                        {% if ticket.status == 'pending' %}
+                        <span class="badge bg-warning">Chờ xử lý</span>
+                        {% else %}
+                        <span class="badge bg-success">Đã giải quyết</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Ngày tạo:</strong> {{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                    {% if ticket.resolved_at %}
+                    <p><strong>Ngày giải quyết:</strong> {{ ticket.resolved_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin người gửi</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Họ tên:</strong> {{ ticket.user.full_name }}</p>
+                    <p><strong>Email:</strong> {{ ticket.user.email }}</p>
+                    <p><strong>Số điện thoại:</strong> {{ ticket.user.phone }}</p>
+                    <p>
+                        <strong>Vai trò:</strong> 
+                        {% if ticket.user.role == 'admin' %}
+                        <span class="badge bg-danger">Admin</span>
+                        {% elif ticket.user.role == 'shop_owner' %}
+                        <span class="badge bg-primary">Chủ tiệm</span>
+                        {% else %}
+                        <span class="badge bg-success">Khách hàng</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Nội dung yêu cầu</h5>
+                </div>
+                <div class="card-body">
+                    <div class="ticket-message p-3 bg-light rounded">
+                        {{ ticket.message|nl2br }}
+                    </div>
+                </div>
+            </div>
+
+            {% if ticket.status == 'resolved' %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Phản hồi từ Admin</h5>
+                </div>
+                <div class="card-body">
+                    <div class="admin-response p-3 bg-light rounded">
+                        {{ ticket.admin_response|nl2br }}
+                    </div>
+                    <div class="text-muted mt-2 small">
+                        Phản hồi bởi: {{ ticket.resolved_by_user.full_name }} - {{ ticket.resolved_at.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Gửi phản hồi</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST"

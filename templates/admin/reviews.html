@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý đánh giá - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-card p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-star me-2"></i>Quản lý đánh giá
+                </h1>
+                <p class="text-muted mb-0">Xem và quản lý tất cả các đánh giá trong hệ thống</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Danh sách đánh giá</h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary">{{ reviews|length }} đánh giá</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if reviews %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Khách hàng</th>
+                                <th>Tiệm</th>
+                                <th>Đánh giá</th>
+                                <th>Nội dung</th>
+                                <th>Ngày tạo</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for review in reviews %}
+                            <tr>
+                                <td>{{ review.id }}</td>
+                                <td>{{ review.customer.full_name }}</td>
+                                <td>{{ review.shop.name }}</td>
+                                <td>
+                                    {% for i in range(5) %}
+                                        {% if i < review.rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>{{ review.comment|truncate(50) }}</td>
+                                <td>{{ review.created_at.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {% if review.is_approved %}
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Chờ duyệt</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        {% if not review.is_approved %}
+                                        <a href="{{ url_for('approve_review', review_id=review.id) }}" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        {% endif %}
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#replyModal{{ review.id }}">
+                                            <i class="fas fa-reply"></i>
+                                        </button>
+                                        <a href="{{ url_for('delete_review', review_id=review.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                    
+                                    <!-- Reply Modal -->
+                                    <div class="modal fade" id="replyModal{{ review.id }}" tabindex="-1" aria-labelledby="replyModalLabel{{ review.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="replyModalLabel{{ review.id }}">Phản hồi đánh giá</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form action="{{ url_for('reply_to_review', review_id=review.id) }}" method="post">
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label for="shopResponse{{ review.id }}" class="form-label">Phản hồi</label>
+                                                            <textarea class="form-control" id="shopResponse{{ review.id }}" name="shop_response" rows="4" required>{{ review.shop_response or '' }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                        <button type="submit" class="btn btn-primary">Gửi phản hồi</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-star text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3">Chưa có đánh giá nào trong hệ thống.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

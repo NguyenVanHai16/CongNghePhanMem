@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Trò chuyện với {{ shop.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-card p-4">
+                <div class="d-flex align-items-center">
+                    {% if shop.image %}
+                        <img src="{{ url_for('static', filename=shop.image) }}" alt="{{ shop.name }}" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-store"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h1 class="h3 mb-1">{{ shop.name }}</h1>
+                        <p class="text-muted mb-0">{{ shop.address }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('all_conversations') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại danh sách tin nhắn
+            </a>
+            <a href="{{ url_for('shop_detail', shop_id=shop.id) }}" class="btn btn-outline-primary ms-2">
+                <i class="fas fa-store me-1"></i>Xem trang tiệm
+            </a>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Messages -->
+                    <div class="chat-messages p-3" id="chatMessages" style="height: 400px; overflow-y: auto;">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="message mb-3 {% if message.sender_id == current_user.id %}message-sent{% else %}message-received{% endif %}">
+                                    <div class="message-content p-3 rounded {% if message.sender_id == current_user.id %}bg-primary text-white ms-auto{% else %}bg-light{% endif %}" style="max-width: 75%; width: fit-content; {% if message.sender_id == current_user.id %}margin-left: auto;{% endif %}">
+                                        {{ message.content }}
+                                        <div class="message-time small {% if message.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %} mt-1">
+                                            {{ message.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-comments text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-3">Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Message Form -->
+                    <form action="{{ url_for('shop_messages', shop_id=shop.id) }}" method="post" class="mt-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="content" placeholder="Nhập tin nhắn..." required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Gửi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Scroll to bottom of chat on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+</script>
+{% endblock %}

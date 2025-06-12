@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}Đặt lịch - {{ shop.name }} - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Shop Info Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="shop-info-card p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="h3 mb-2">Đặt lịch tại {{ shop.name }}</h1>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ shop.address }}
+                        </p>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-clock me-2"></i>
+                            {{ shop.opening_time.strftime('%H:%M') }} - {{ shop.closing_time.strftime('%H:%M') }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        {% if shop.distance_from_university %}
+                        <span class="badge bg-primary fs-6">{{ "%.1f"|format(shop.distance_from_university) }}km từ TNUT</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Booking Form -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>Thông tin đặt lịch
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="bookingForm">
+                        <!-- Service Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Chọn dịch vụ *</label>
+                            {% if services %}
+                                <div class="row g-3">
+                                    {% for service in services %}
+                                    <div class="col-md-6">
+                                        <div class="service-option">
+                                            <input type="radio" 
+                                                   class="btn-check" 
+                                                   name="service_id" 
+                                                   value="{{ service.id }}" 
+                                                   id="service{{ service.id }}" 
+                                                   required>
+                                            <label class="btn btn-outline-primary w-100 p-3 text-start" for="service{{ service.id }}">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <h6 class="mb-1">{{ service.name }}</h6>
+                                                        <p class="mb-1 text-muted small">{{ service.description or 'Dịch vụ chuyên nghiệp' }}</p>
+                                                        <small class="text-muted">{{ service.duration }} phút</small>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <strong class="text-primary">{{ "{:,}".format(service.price) }} VNĐ</strong>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Cửa hàng này chưa có dịch vụ nào.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Barber Selection -->
+                        {% if barbers %}
+                        <div class="mb-4">
+                            <label class="form-label">Chọn thợ cắt tóc (tùy chọn)</label>
+                            <select class="form-select" name="barber_id">
+                                <option value="">Bất kỳ thợ nào có thể</option>
+                                {% for barber in barbers %}
+                                <option value="{{ barber.id }}">{{ barber.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <!-- Date Selection -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="booking_date" class="form-label">Chọn ngày *</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="booking_date" 
+                                       name="booking_date" 
+                                       min="{{ available_dates[0].strftime('%Y-%m-%d') }}" 
+                                       max="{{ available_dates[-1].strftime('%Y-%m-%d') }}" 
+                                       required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="booking_time" class="form-label">Chọn giờ *</label>
+                                <select class="form-select" id="booking_time" name="booking_time" required>
+                                    <option value="">Chọn giờ</option>
+                                    <!-- Time slots will be populated by JavaScript -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Ghi chú (tùy chọn)</label>
+                            <textarea class="form-control" 
+                                      id="notes" 
+                                      name="notes" 
+                                      rows="3" 
+                                      placeholder="Yêu cầu đặc biệt, ghi chú thêm..."></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-calendar-plus me-2"></i>Đặt lịch ngay
+                            </button>
+                            <a href="{{ url_for('shop_detail', shop_id=shop.id) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <!-- Shop Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Thông tin cửa hàng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="shop-detail">
+                        <h6>{{ shop.name }}</h6>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ shop.address }}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-phone me-2"></i>{{ shop.phone }}
+                        </p>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-clock me-2"></i>
+                            {{ shop.opening_time.strftime('%H:%M') }} - {{ shop.closing_time.strftime('%H:%M') }}
+                        </p>
+                        {% if shop.description %}
+                        <p class="text-muted">{{ shop.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Guidelines -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Hướng dẫn đặt lịch
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled booking-guidelines">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Chọn dịch vụ và thời gian phù hợp
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Đến đúng giờ đã đặt
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Cửa hàng sẽ xác nhận lịch hẹn của bạn
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Có thể hủy lịch trước 2 giờ
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Thanh toán trực tiếp tại cửa hàng
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('booking_date');
+    const timeSelect = document.getElementById('booking_time');
+    const shopOpenTime = '{{ shop.opening_time.strftime("%H:%M") }}';
+    const shopCloseTime = '{{ shop.closing_time.strftime("%H:%M") }}';
+
+    // Generate time slots
+    function generateTimeSlots() {
+        const slots = [];
+        const [openHour, openMin] = shopOpenTime.split(':').map(Number);
+        const [closeHour, closeMin] = shopCloseTime.split(':').map(Number);
+        
+        let currentHour = openHour;
+        let currentMin = openMin;
+        
+        while (currentHour < closeHour || (currentHour === closeHour && currentMin <= closeMin - 30)) {
+            const timeStr = `${currentHour.toString().padStart(2, '0')}:${currentMin.toString().padStart(2, '0')}`;
+            slots.push(timeStr);
+            
+            // Increment by 30 minutes
+            currentMin += 30;
+            if (currentMin >= 60) {
+                currentMin = 0;
+                currentHour++;
+            }
+        }
+        
+        return slots;
+    }
+
+    // Update time slots when date changes
+    dateInput.addEventListener('change', function() {
+        const selectedDate = this.value;
+        timeSelect.innerHTML = '<option value="">Chọn giờ</option>';
+        
+        if (selectedDate) {
+            const timeSlots = generateTimeSlots();
+            const now = new Date();
+            const selected = new Date(selectedDate);
+            const isToday = selected.toDateString() === now.toDateString();
+            
+            timeSlots.forEach(slot => {
+                if (isToday) {
+                    const [hour, min] = slot.split(':').map(Number);
+                    const slotTime = new Date();
+                    slotTime.setHours(hour, min, 0, 0);
+                    
+                    // Only show future time slots for today
+                    if (slotTime > now) {
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = slot;
+                        timeSelect.appendChild(option);
+                    }
+                } else {
+                    const option = document.createElement('option');
+                    option.value = slot;
+                    option.textContent = slot;
+                    timeSelect.appendChild(option);
+                }
+            });
+        }
+    });
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+
+    // Form validation
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        const serviceSelected = document.querySelector('input[name="service_id"]:checked');
+        const dateSelected = dateInput.value;
+        const timeSelected = timeSelect.value;
+
+        if (!serviceSelected) {
+            e.preventDefault();
+            alert('Vui lòng chọn dịch vụ!');
+            return;
+        }
+
+        if (!dateSelected) {
+            e.preventDefault();
+            alert('Vui lòng chọn ngày!');
+            return;
+        }
+
+        if (!timeSelected) {
+            e.preventDefault();
+            alert('Vui lòng chọn giờ!');
+            return;
+        }
+
+        // Check if booking time is in the future
+        const selectedDateTime = new Date(`${dateSelected}T${timeSelected}`);
+        const now = new Date();
+        
+        if (selectedDateTime <= now) {
+            e.preventDefault();
+            alert('Vui lòng chọn thời gian trong tương lai!');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

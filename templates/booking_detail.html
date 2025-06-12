@@ -1,0 +1,8 @@
+<!-- Nếu có nút hủy lịch trong template này -->
+{% if booking.status in ['pending', 'confirmed'] %}
+<a href="{{ url_for('cancel_booking_request', booking_id=booking.id) }}" 
+   class="btn btn-danger"
+   onclick="return confirm('Bạn có chắc muốn hủy lịch hẹn này?')">
+    <i class="fas fa-times-circle me-1"></i>Hủy lịch
+</a>
+{% endif %}

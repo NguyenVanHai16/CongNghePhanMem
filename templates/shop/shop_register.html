@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng ký tiệm - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-store me-2"></i>Đăng ký tiệm cắt tóc</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Vui lòng cung cấp thông tin về tiệm cắt tóc của bạn. Thông tin này sẽ được hiển thị cho khách hàng.</p>
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Thông tin cơ bản</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Tên tiệm *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Số điện thoại tiệm *</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Địa chỉ *</label>
+                                    <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Mô tả tiệm</label>
+                                    <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                                    <div class="form-text">Mô tả ngắn gọn về tiệm, dịch vụ nổi bật, v.v.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Giờ làm việc & Vị trí</h5>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="opening_time" class="form-label">Giờ mở cửa *</label>
+                                        <input type="time" class="form-control" id="opening_time" name="opening_time" value="08:00" required>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="closing_time" class="form-label">Giờ đóng cửa *</label>
+                                        <input type="time" class="form-control" id="closing_time" name="closing_time" value="20:00" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="distance_from_university" class="form-label">Khoảng cách từ TNUT (km) *</label>
+                                    <input type="number" step="0.1" class="form-control" id="distance_from_university" name="distance_from_university" required>
+                                    <div class="form-text">Khoảng cách từ tiệm đến trường đại học Thái Nguyên</div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="latitude" class="form-label">Vĩ độ (Latitude)</label>
+                                        <input type="text" class="form-control" id="latitude" name="latitude">
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label for="longitude" class="form-label">Kinh độ (Longitude)</label>
+                                        <input type="text" class="form-control" id="longitude" name="longitude">
+                                    </div>
+                                    <div class="form-text">Tọa độ vị trí tiệm trên bản đồ</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <button type="button" id="getLocationBtn" class="btn btn-outline-primary">
+                                        <i class="fas fa-location-arrow me-2"></i>Lấy vị trí hiện tại
+                                    </button>
+                                    <button type="button" id="showMapBtn" class="btn btn-outline-secondary ms-2">
+                                        <i class="fas fa-map-marked-alt me-2"></i>Chọn trên bản đồ
+                                    </button>
+                                </div>
+
+                                <div id="mapContainer" class="mb-3" style="display: none;">
+                                    <div id="locationMap" style="width: 100%; height: 300px;"></div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="shop_image" class="form-label">Hình ảnh tiệm</label>
+                                    <input type="file" class="form-control" id="shop_image" name="shop_image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>Sau khi đăng ký, tiệm của bạn sẽ được quản trị viên xem xét và phê duyệt trong thời gian sớm nhất.
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-store me-2"></i>Đăng ký tiệm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('shopRegisterForm');
+    const getLocationBtn = document.getElementById('getLocationBtn');
+    const showMapBtn = document.getElementById('showMapBtn');
+    const mapContainer = document.getElementById('mapContainer');
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    const distanceInput = document.getElementById('distance_from_university');
+    let map, marker;
+    
+    // Get current location
+    getLocationBtn.addEventListener('click', function() {
+        if (navigator.geolocation) {
+            getLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lấy vị trí...';
+            getLocationBtn.disabled = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    latInput.value = position.coords.latitude.toFixed(6);
+                    lngInput.value = position.coords.longitude.toFixed(6);
+                    
+                    // Tính khoảng cách từ TNUT (21.5942, 105.8167)
+                    const distance = calculateDistance(
+                        21.5942, 105.8167,
+                        position.coords.latitude, position.coords.longitude
+                    );
+                    
+                    if (distanceInput) {
+                        distanceInput.value = distance.toFixed(1);
+                    }
+                    
+                    getLocationBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đã lấy vị trí';
+                    getLocationBtn.classList.remove('btn-outline-primary');
+                    getLocationBtn.classList.add('btn-success');
+                    
+                    // Hiển thị bản đồ với vị trí đã lấy
+                    showMapWithLocation(position.coords.latitude, position.coords.longitude);
+                    
+                    setTimeout(() => {
+                        getLocationBtn.innerHTML = '<i class="fas fa-location-arrow me-2"></i>Lấy vị trí hiện tại';
+                        getLocationBtn.classList.remove('btn-success');
+                        getLocationBtn.classList.add('btn-outline-primary');
+                        getLocationBtn.disabled = false;
+                    }, 2000);
+                },
+                function(error) {
+                    alert('Không thể lấy vị trí hiện tại. Vui lòng nhập thủ công.');
+                    getLocationBtn.innerHTML = '<i class="fas fa-location-arrow me-2"></i>Lấy vị trí hiện tại';
+                    getLocationBtn.disabled = false;
+                }
+            );
+        } else {
+            alert('Trình duyệt không hỗ trợ định vị.');
+        }
+    });
+    
+    // Show map button
+    showMapBtn.addEventListener('click', function() {
+        if (mapContainer.style.display === 'none') {
+            mapContainer.style.display = 'block';
+            showMapBtn.innerHTML = '<i class="fas fa-map-marked-alt me-2"></i>Ẩn bản đồ';
+            
+            // Initialize map
+            initializeMap();
+        } else {
+            mapContainer.style.display = 'none';
+            showMapBtn.innerHTML = '<i class="fas fa-map-marked-alt me-2"></i>Chọn trên bản đồ';
+        }
+    });
+    
+    // Initialize map with default location or current input
+    function initializeMap() {
+        // Vị trí mặc định (Thái Nguyên)
+        const defaultLocation = { lat: 21.5942, lng: 105.8167 };
+        const lat = parseFloat(latInput.value) || defaultLocation.lat;
+        const lng = parseFloat(lngInput.value) || defaultLocation.lng;
+        
+        map = new google.maps.Map(document.getElementById("locationMap"), {
+            zoom: 15,
+            center: { lat, lng },
+        });
+        
+        // Add marker for shop location
+        marker = new google.maps.Marker({
+            position: { lat, lng },
+            map: map,
+            draggable: true,
+            title: "Vị trí tiệm"
+        });
+        
+        // Update coordinates when marker is dragged
+        google.maps.event.addListener(marker, 'dragend', function() {
+            const position = marker.getPosition();
+            latInput.value = position.lat().toFixed(6);
+            lngInput.value = position.lng().toFixed(6);
+            
+            // Tính khoảng cách từ TNUT
+            const distance = calculateDistance(
+                21.5942, 105.8167,
+                position.lat(), position.lng()
+            );
+            
+            if (distanceInput) {
+                distanceInput.value = distance.toFixed(1);
+            }
+        });
+        
+        // Allow clicking on map to move marker
+        google.maps.event.addListener(map, 'click', function(event) {
+            marker.setPosition(event.latLng);
+            latInput.value = event.latLng.lat().toFixed(6);
+            lngInput.value = event.latLng.lng().toFixed(6);
+            
+            // Tính khoảng cách từ TNUT
+            const distance = calculateDistance(
+                21.5942, 105.8167,
+                event.latLng.lat(), event.latLng.lng()
+            );
+            
+            if (distanceInput) {
+                distanceInput.value = distance.toFixed(1);
+            }
+        });
+    }
+    
+    // Show map with specific location
+    function showMapWithLocation(lat, lng) {
+        mapContainer.style.display = 'block';
+        showMapBtn.innerHTML = '<i class="fas fa-map-marked-alt me-2"></i>Ẩn bản đồ';
+        
+        if (!map) {
+            initializeMap();
+        } else {
+            map.setCenter({ lat, lng });
+            marker.setPosition({ lat, lng });
+        }
+    }
+    
+    // Calculate distance between two points using Haversine formula
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = toRadians(lat2 - lat1);
+        const dLng = toRadians(lng2 - lng1);
+        
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+    
+    function toRadians(degrees) {
+        return degrees * (Math.PI / 180);
+    }
+});
+</script>
+
+<!-- Tải Google Maps JavaScript API không cần API key -->
+<script src="https://maps.googleapis.com/maps/api/js?v=weekly" defer></script>
+{% endblock %}
+
+
+

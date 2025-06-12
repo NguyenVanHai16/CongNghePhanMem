@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Đánh giá dịch vụ{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Đánh giá dịch vụ</h4>
+                </div>
+                <div class="card-body">
+                    <div class="booking-info mb-4">
+                        <h5>Thông tin lịch hẹn</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Tiệm:</strong> {{ booking.shop.name }}</p>
+                                <p><strong>Dịch vụ:</strong> {{ booking.service.name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Ngày:</strong> {{ booking.booking_date.strftime('%d/%m/%Y') }}</p>
+                                <p><strong>Giờ:</strong> {{ booking.booking_time.strftime('%H:%M') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form action="{{ url_for('submit_review', booking_id=booking.id) }}" method="post">
+                        <div class="mb-4">
+                            <label class="form-label">Đánh giá của bạn</label>
+                            <div class="rating-input text-center">
+                                <div class="stars mb-2">
+                                    {% for i in range(1, 6) %}
+                                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if i == 5 %}checked{% endif %} class="d-none">
+                                        <label for="star{{ i }}" class="star-label">
+                                            <i class="far fa-star fa-2x"></i>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="comment" class="form-label">Nhận xét của bạn</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                            <a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline-secondary">Quay lại</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Star rating functionality
+    const stars = document.querySelectorAll('.star-label');
+    
+    stars.forEach((star, index) => {
+        star.addEventListener('mouseover', () => {
+            // Highlight stars on hover
+            for (let i = 0; i <= index; i++) {
+                stars[i].querySelector('i').classList.remove('far');
+                stars[i].querySelector('i').classList.add('fas');
+                stars[i].querySelector('i').classList.add('text-warning');
+            }
+            
+            // Remove highlight from stars after
+            for (let i = index + 1; i < stars.length; i++) {
+                stars[i].querySelector('i').classList.remove('fas');
+                stars[i].querySelector('i').classList.remove('text-warning');
+                stars[i].querySelector('i').classList.add('far');
+            }
+        });
+        
+        star.addEventListener('click', () => {
+            // Set the radio button value
+            document.getElementById(`star${index + 1}`).checked = true;
+            
+            // Update stars appearance
+            for (let i = 0; i <= index; i++) {
+                stars[i].querySelector('i').classList.remove('far');
+                stars[i].querySelector('i').classList.add('fas');
+                stars[i].querySelector('i').classList.add('text-warning');
+            }
+            
+            for (let i = index + 1; i < stars.length; i++) {
+                stars[i].querySelector('i').classList.remove('fas');
+                stars[i].querySelector('i').classList.remove('text-warning');
+                stars[i].querySelector('i').classList.add('far');
+            }
+        });
+    });
+    
+    // Reset stars when mouse leaves the container
+    const ratingContainer = document.querySelector('.rating-input');
+    ratingContainer.addEventListener('mouseleave', () => {
+        // Find which star is selected
+        const checkedStar = document.querySelector('input[name="rating"]:checked');
+        const checkedValue = checkedStar ? parseInt(checkedStar.value) : 5;
+        
+        // Reset stars based on selected value
+        stars.forEach((star, index) => {
+            if (index < checkedValue) {
+                star.querySelector('i').classList.remove('far');
+                star.querySelector('i').classList.add('fas');
+                star.querySelector('i').classList.add('text-warning');
+            } else {
+                star.querySelector('i').classList.remove('fas');
+                star.querySelector('i').classList.remove('text-warning');
+                star.querySelector('i').classList.add('far');
+            }
+        });
+    });
+    
+    // Initialize stars based on default value
+    const defaultRating = 5;
+    for (let i = 0; i < defaultRating; i++) {
+        stars[i].querySelector('i').classList.remove('far');
+        stars[i].querySelector('i').classList.add('fas');
+        stars[i].querySelector('i').classList.add('text-warning');
+    }
+});
+</script>
+{% endblock %}
+
+{% endblock %}

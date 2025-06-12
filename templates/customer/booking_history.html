@@ -1,0 +1,6 @@
+<!-- Thay thế tất cả url_for('cancel_booking', booking_id=booking.id) -->
+<a href="{{ url_for('cancel_booking_request', booking_id=booking.id) }}"
+   class="btn btn-sm btn-outline-danger"
+   onclick="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')">
+    <i class="fas fa-times-circle"></i> Hủy
+</a>

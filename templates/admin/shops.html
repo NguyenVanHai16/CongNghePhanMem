@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý tiệm cắt tóc - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Admin Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-store me-2"></i>Quản lý tiệm cắt tóc
+                </h1>
+                <p class="text-muted mb-0">Quản lý các tiệm cắt tóc trong hệ thống</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Shops Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Danh sách tiệm cắt tóc</h5>
+                </div>
+                <div class="col-auto">
+                    <input type="text" id="shopSearch" class="form-control form-control-sm" placeholder="Tìm kiếm...">
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên tiệm</th>
+                            <th>Chủ tiệm</th>
+                            <th>Địa chỉ</th>
+                            <th>Khoảng cách</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shop in shops %}
+                        <tr>
+                            <td>{{ shop.id }}</td>
+                            <td>{{ shop.name }}</td>
+                            <td>{{ shop.owner.full_name }}</td>
+                            <td>{{ shop.address }}</td>
+                            <td>{{ shop.distance_from_university }} km</td>
+                            <td>
+                                {% if shop.is_approved %}
+                                <span class="badge bg-success">Đã duyệt</span>
+                                {% else %}
+                                <span class="badge bg-warning">Chờ duyệt</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ shop.created_at.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('admin_edit_shop', shop_id=shop.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ url_for('admin_toggle_shop', shop_id=shop.id) }}" class="btn btn-sm btn-outline-warning" 
+                                       onclick="return confirm('Bạn có chắc muốn {% if shop.is_approved %}hủy phê duyệt{% else %}phê duyệt{% endif %} tiệm này?')">
+                                        {% if shop.is_approved %}
+                                        <i class="fas fa-times"></i>
+                                        {% else %}
+                                        <i class="fas fa-check"></i>
+                                        {% endif %}
+                                    </a>
+                                    <a href="{{ url_for('admin_delete_shop', shop_id=shop.id) }}" class="btn btn-sm btn-outline-danger" 
+                                       onclick="return confirm('Bạn có chắc muốn xóa tiệm này? Hành động này không thể hoàn tác!')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('shopSearch').addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    let table = document.querySelector('table');
+    let tr = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName('td');
+        let found = false;
+        
+        for (let j = 0; j < td.length; j++) {
+            let cell = td[j];
+            if (cell && cell.innerHTML.toLowerCase().indexOf(filter) > -1) {
+                found = true;
+                break;
+            }
+        }
+        
+        tr[i].style.display = found ? '' : 'none';
+    }
+});
+</script>
+{% endblock %}

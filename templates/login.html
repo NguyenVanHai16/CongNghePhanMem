@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng nhập - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="auth-card">
+                <div class="text-center mb-4">
+                    <i class="fas fa-cut auth-icon"></i>
+                    <h2 class="fw-bold">Đăng nhập</h2>
+                    <p class="text-muted">Truy cập vào tài khoản của bạn</p>
+                </div>
+
+                <form method="POST" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Tên đăng nhập</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Mật khẩu</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                    </button>
+                </form>
+
+                <div class="text-center">
+                    <p class="text-muted">
+                        Chưa có tài khoản? 
+                        <a href="{{ url_for('register') }}" class="text-decoration-none">Đăng ký ngay</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const password = document.getElementById('password');
+    const icon = this.querySelector('i');
+    
+    if (password.type === 'password') {
+        password.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        password.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+</script>
+{% endblock %}

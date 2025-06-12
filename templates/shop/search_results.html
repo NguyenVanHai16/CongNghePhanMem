@@ -1,0 +1,14 @@
+<!-- Thêm nút nhắn tin vào mỗi kết quả tìm kiếm -->
+<div class="shop-card-actions mt-3">
+    <a href="{{ url_for('shop_detail', shop_id=shop.id) }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-info-circle me-1"></i>Chi tiết
+    </a>
+    <a href="{{ url_for('create_booking', shop_id=shop.id) }}" class="btn btn-outline-primary btn-sm ms-2">
+        <i class="fas fa-calendar-plus me-1"></i>Đặt lịch
+    </a>
+    {% if current_user.is_authenticated and current_user.role == 'customer' %}
+        <a href="{{ url_for('shop_messages', shop_id=shop.id) }}" class="btn btn-outline-primary btn-sm ms-2">
+            <i class="fas fa-comments me-1"></i>Nhắn tin
+        </a>
+    {% endif %}
+</div>

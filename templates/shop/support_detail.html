@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết hỗ trợ - {{ shop.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="shop-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-ticket-alt me-2"></i>Chi tiết yêu cầu hỗ trợ
+                </h1>
+                <p class="text-muted mb-0">
+                    Yêu cầu #{{ ticket.id if ticket else 'N/A' }} - 
+                    {% if ticket and ticket.status == 'pending' %}
+                    <span class="badge bg-warning">Chờ xử lý</span>
+                    {% elif ticket %}
+                    <span class="badge bg-success">Đã giải quyết</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Không có dữ liệu</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('shop_support', shop_id=shop.id) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    {% if ticket %}
+    <!-- Ticket Details -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin yêu cầu</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID:</strong> {{ ticket.id }}</p>
+                    <p><strong>Tiêu đề:</strong> {{ ticket.subject }}</p>
+                    <p>
+                        <strong>Loại:</strong> 
+                        {% if ticket.type == 'technical' %}
+                        <span class="badge bg-info">Kỹ thuật</span>
+                        {% elif ticket.type == 'billing' %}
+                        <span class="badge bg-warning">Thanh toán</span>
+                        {% elif ticket.type == 'complaint' %}
+                        <span class="badge bg-danger">Khiếu nại</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Khác</span>
+                        {% endif %}
+                    </p>
+                    <p>
+                        <strong>Trạng thái:</strong> 
+                        {% if ticket.status == 'pending' %}
+                        <span class="badge bg-warning">Chờ xử lý</span>
+                        {% else %}
+                        <span class="badge bg-success">Đã giải quyết</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Ngày tạo:</strong> {{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Nội dung yêu cầu</h5>
+                </div>
+                <div class="card-body">
+                    <div class="ticket-message p-3 bg-light rounded">
+                        {{ ticket.message|nl2br }}
+                    </div>
+                </div>
+            </div>
+
+            {% if ticket.status == 'resolved' and ticket.admin_response %}
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Phản hồi từ Admin</h5>
+                </div>
+                <div class="card-body">
+                    <div class="admin-response p-3 bg-light rounded">
+                        {{ ticket.admin_response|nl2br }}
+                    </div>
+                    <div class="text-muted mt-2 small">
+                        Phản hồi lúc: {{ ticket.resolved_at.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Không tìm thấy thông tin yêu cầu hỗ trợ hoặc chức năng này đang được phát triển.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

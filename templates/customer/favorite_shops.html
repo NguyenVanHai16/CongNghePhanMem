@@ -1,0 +1,15 @@
+<!-- Thêm nút nhắn tin vào mỗi tiệm đã lưu -->
+<div class="shop-card-actions mt-3">
+    <a href="{{ url_for('shop_detail', shop_id=shop.id) }}" class="btn btn-primary btn-sm">
+        <i class="fas fa-info-circle me-1"></i>Chi tiết
+    </a>
+    <a href="{{ url_for('create_booking', shop_id=shop.id) }}" class="btn btn-outline-primary btn-sm ms-2">
+        <i class="fas fa-calendar-plus me-1"></i>Đặt lịch
+    </a>
+    <a href="{{ url_for('shop_messages', shop_id=shop.id) }}" class="btn btn-outline-primary btn-sm ms-2">
+        <i class="fas fa-comments me-1"></i>Nhắn tin
+    </a>
+    <button class="btn btn-outline-danger btn-sm ms-2" onclick="removeFavorite({{ shop.id }})">
+        <i class="fas fa-heart-broken me-1"></i>Bỏ lưu
+    </button>
+</div>

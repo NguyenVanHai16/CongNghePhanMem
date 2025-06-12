@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý lịch hẹn - {{ shop.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="shop-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-calendar-alt me-2"></i>Quản lý lịch hẹn
+                </h1>
+                <p class="text-muted mb-0">Quản lý các lịch hẹn của tiệm {{ shop.name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Trạng thái</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="all" {% if status == 'all' %}selected{% endif %}>Tất cả</option>
+                        <option value="pending" {% if status == 'pending' %}selected{% endif %}>Chờ xác nhận</option>
+                        <option value="confirmed" {% if status == 'confirmed' %}selected{% endif %}>Đã xác nhận</option>
+                        <option value="completed" {% if status == 'completed' %}selected{% endif %}>Đã hoàn thành</option>
+                        <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="date_from" class="form-label">Từ ngày</label>
+                    <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="date_to" class="form-label">Đến ngày</label>
+                    <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter me-1"></i>Lọc
+                    </button>
+                    <a href="{{ url_for('shop_bookings', shop_id=shop.id) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-1"></i>Đặt lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bookings List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Danh sách lịch hẹn</h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary">{{ bookings|length }} lịch hẹn</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Khách hàng</th>
+                                <th>Dịch vụ</th>
+                                <th>Thợ cắt tóc</th>
+                                <th>Ngày</th>
+                                <th>Giờ</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.id }}</td>
+                                    <td>{{ booking.customer.full_name }}</td>
+                                    <td>{{ booking.service.name if booking.service else 'N/A' }}</td>
+                                    <td>{{ booking.barber.name if booking.barber else 'N/A' }}</td>
+                                    <td>{{ booking.booking_date.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ booking.booking_time.strftime('%H:%M') }}</td>
+                                    <td>
+                                        {% if booking.status == 'pending' %}
+                                            <span class="badge bg-warning">Chờ xác nhận</span>
+                                        {% elif booking.status == 'confirmed' %}
+                                            <span class="badge bg-success">Đã xác nhận</span>
+                                        {% elif booking.status == 'completed' %}
+                                            <span class="badge bg-info">Đã hoàn thành</span>
+                                        {% elif booking.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Đã hủy</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('booking_detail', booking_id=booking.id) }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if booking.status == 'pending' %}
+                                                <a href="{{ url_for('shop_confirm_booking', booking_id=booking.id) }}" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                            {% elif booking.status == 'confirmed' %}
+                                                <a href="{{ url_for('complete_booking', booking_id=booking.id) }}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-check-double"></i>
+                                                </a>
+                                            {% endif %}
+                                            {% if booking.status in ['pending', 'confirmed'] %}
+                                                <a href="{{ url_for('cancel_booking_request', booking_id=booking.id) }}" class="btn btn-danger btn-sm"
+                                                   onclick="return confirm('Bạn có chắc muốn hủy lịch hẹn này?')">
+                                                    <i class="fas fa-times-circle"></i> Hủy
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">Không có lịch hẹn nào phù hợp với bộ lọc.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

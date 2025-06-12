@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng ký - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="auth-card">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus auth-icon"></i>
+                    <h2 class="fw-bold">Đăng ký tài khoản</h2>
+                    <p class="text-muted">Tạo tài khoản để bắt đầu sử dụng dịch vụ</p>
+                </div>
+
+                <!-- Role Selection -->
+                <div class="role-selection mb-4">
+                    <h5 class="text-center mb-3">Bạn muốn đăng ký với vai trò gì?</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="role-card customer-role active" data-role="customer">
+                                <div class="role-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h5>Khách hàng</h5>
+                                <p class="small text-muted">Đặt lịch cắt tóc tại các tiệm</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="role-card shop-owner-role" data-role="shop_owner">
+                                <div class="role-icon">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <h5>Chủ tiệm</h5>
+                                <p class="small text-muted">Quản lý tiệm cắt tóc của bạn</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="POST" novalidate>
+                    <input type="hidden" id="role" name="role" value="customer">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">Tên đăng nhập *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="full_name" class="form-label">Họ và tên *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-id-card"></i>
+                                </span>
+                                <input type="text" class="form-control" id="full_name" name="full_name" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Số điện thoại *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-phone"></i>
+                                </span>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="password" class="form-label">Mật khẩu *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label for="confirm_password" class="form-label">Xác nhận mật khẩu *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                        <i class="fas fa-user-plus me-2"></i>Đăng ký
+                    </button>
+                </form>
+
+                <div class="text-center">
+                    <p class="text-muted">
+                        Đã có tài khoản? 
+                        <a href="{{ url_for('login') }}" class="text-decoration-none">Đăng nhập ngay</a>
+                    </p>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <h6><i class="fas fa-info-circle me-2"></i>Lưu ý</h6>
+                    <ul class="mb-0">
+                        <li>Nếu đăng ký làm chủ tiệm, bạn sẽ cần cung cấp thêm thông tin về tiệm sau khi đăng nhập</li>
+                        <li>Tất cả thông tin được bảo mật an toàn</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Toggle password visibility
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const password = document.getElementById('password');
+    const icon = this.querySelector('i');
+    
+    if (password.type === 'password') {
+        password.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        password.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+    const password = document.getElementById('confirm_password');
+    const icon = this.querySelector('i');
+    
+    if (password.type === 'password') {
+        password.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        password.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+// Role selection
+const roleCards = document.querySelectorAll('.role-card');
+const roleInput = document.getElementById('role');
+
+roleCards.forEach(card => {
+    card.addEventListener('click', function() {
+        // Remove active class from all cards
+        roleCards.forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked card
+        this.classList.add('active');
+        
+        // Update hidden input value
+        roleInput.value = this.dataset.role;
+    });
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('Mật khẩu xác nhận không khớp!');
+        return false;
+    }
+    
+    if (password.length < 6) {
+        e.preventDefault();
+        alert('Mật khẩu phải có ít nhất 6 ký tự!');
+        return false;
+    }
+});
+</script>
+
+<style>
+.role-card {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.role-card:hover {
+    border-color: #6c757d;
+    transform: translateY(-5px);
+}
+
+.role-card.active {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.role-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #6c757d;
+}
+
+.role-card.active .role-icon {
+    color: #0d6efd;
+}
+
+.customer-role .role-icon {
+    color: #198754;
+}
+
+.shop-owner-role .role-icon {
+    color: #fd7e14;
+}
+
+.role-card.active.customer-role {
+    border-color: #198754;
+    background-color: rgba(25, 135, 84, 0.05);
+}
+
+.role-card.active.customer-role .role-icon {
+    color: #198754;
+}
+
+.role-card.active.shop-owner-role {
+    border-color: #fd7e14;
+    background-color: rgba(253, 126, 20, 0.05);
+}
+
+.role-card.active.shop-owner-role .role-icon {
+    color: #fd7e14;
+}
+</style>
+{% endblock %}
+

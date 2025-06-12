@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Chỉnh sửa tiệm cắt tóc - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Admin Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-store-alt me-2"></i>Chỉnh sửa tiệm cắt tóc
+                </h1>
+                <p class="text-muted mb-0">Cập nhật thông tin tiệm: {{ shop.name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Thông tin cơ bản</h5>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tên tiệm *</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ shop.name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Số điện thoại *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ shop.phone }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Địa chỉ *</label>
+                            <textarea class="form-control" id="address" name="address" rows="3" required>{{ shop.address }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="description" name="description" rows="4">{{ shop.description }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Thông tin bổ sung</h5>
+                        
+                        <div class="mb-3">
+                            <label for="opening_time" class="form-label">Giờ mở cửa *</label>
+                            <input type="time" class="form-control" id="opening_time" name="opening_time" value="{{ shop.opening_time }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="closing_time" class="form-label">Giờ đóng cửa *</label>
+                            <input type="time" class="form-control" id="closing_time" name="closing_time" value="{{ shop.closing_time }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="distance_from_university" class="form-label">Khoảng cách từ trường (km) *</label>
+                            <input type="number" step="0.1" class="form-control" id="distance_from_university" name="distance_from_university" value="{{ shop.distance_from_university }}" required>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_approved" name="is_approved" {% if shop.is_approved %}checked{% endif %}>
+                            <label class="form-check-label" for="is_approved">Đã phê duyệt</label>
+                        </div>
+                        
+                        {% if shop.image %}
+                        <div class="mb-3">
+                            <label class="form-label">Hình ảnh hiện tại</label>
+                            <div>
+                                <img src="{{ url_for('static', filename=shop.image) }}" alt="{{ shop.name }}" class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="latitude" class="form-label">Vĩ độ (Latitude)</label>
+                        <input type="text" class="form-control" id="latitude" name="latitude" value="{{ shop.latitude }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="longitude" class="form-label">Kinh độ (Longitude)</label>
+                        <input type="text" class="form-control" id="longitude" name="longitude" value="{{ shop.longitude }}">
+                    </div>
+                    <div class="form-text">Tọa độ vị trí tiệm trên bản đồ</div>
+                </div>
+
+                <div class="mb-3">
+                    <button type="button" id="showMapBtn" class="btn btn-outline-secondary">
+                        <i class="fas fa-map-marked-alt me-2"></i>Chọn trên bản đồ
+                    </button>
+                </div>
+
+                <div id="mapContainer" class="mb-3" style="display: none;">
+                    <div id="locationMap" style="width: 100%; height: 300px;"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('admin_shops') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const showMapBtn = document.getElementById('showMapBtn');
+    const mapContainer = document.getElementById('mapContainer');
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    const distanceInput = document.getElementById('distance_from_university');
+    let map, marker;
+    
+    // Show map button
+    showMapBtn.addEventListener('click', function() {
+        if (mapContainer.style.display === 'none') {
+            mapContainer.style.display = 'block';
+            showMapBtn.innerHTML = '<i class="fas fa-map-marked-alt me-2"></i>Ẩn bản đồ';
+            
+            // Initialize map
+            initializeMap();
+        } else {
+            mapContainer.style.display = 'none';
+            showMapBtn.innerHTML = '<i class="fas fa-map-marked-alt me-2"></i>Chọn trên bản đồ';
+        }
+    });
+    
+    // Initialize map with shop location or default
+    function initializeMap() {
+        // Vị trí mặc định (Thái Nguyên)
+        const defaultLocation = { lat: 21.5942, lng: 105.8167 };
+        const lat = parseFloat(latInput.value) || defaultLocation.lat;
+        const lng = parseFloat(lngInput.value) || defaultLocation.lng;
+        
+        map = new google.maps.Map(document.getElementById("locationMap"), {
+            zoom: 15,
+            center: { lat, lng },
+        });
+        
+        // Add marker for shop location
+        marker = new google.maps.Marker({
+            position: { lat, lng },
+            map: map,
+            draggable: true,
+            title: "Vị trí tiệm"
+        });
+        
+        // Update coordinates when marker is dragged
+        google.maps.event.addListener(marker, 'dragend', function() {
+            const position = marker.getPosition();
+            latInput.value = position.lat().toFixed(6);
+            lngInput.value = position.lng().toFixed(6);
+            
+            // Tính khoảng cách từ TNUT
+            const distance = calculateDistance(
+                21.5942, 105.8167,
+                position.lat(), position.lng()
+            );
+            
+            if (distanceInput) {
+                distanceInput.value = distance.toFixed(1);
+            }
+        });
+        
+        // Allow clicking on map to move marker
+        google.maps.event.addListener(map, 'click', function(event) {
+            marker.setPosition(event.latLng);
+            latInput.value = event.latLng.lat().toFixed(6);
+            lngInput.value = event.latLng.lng().toFixed(6);
+            
+            // Tính khoảng cách từ TNUT
+            const distance = calculateDistance(
+                21.5942, 105.8167,
+                event.latLng.lat(), event.latLng.lng()
+            );
+            
+            if (distanceInput) {
+                distanceInput.value = distance.toFixed(1);
+            }
+        });
+    }
+    
+    // Calculate distance between two points using Haversine formula
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = toRadians(lat2 - lat1);
+        const dLng = toRadians(lng2 - lng1);
+        
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+    
+    function toRadians(degrees) {
+        return degrees * (Math.PI / 180);
+    }
+});
+</script>
+
+<!-- Tải Google Maps JavaScript API không cần API key -->
+<script src="https://maps.googleapis.com/maps/api/js?v=weekly" defer></script>
+{% endblock %}
+
+
+

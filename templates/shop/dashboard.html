@@ -1,0 +1,22 @@
+<!-- Thêm nút tin nhắn vào menu -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('shop_bookings', shop_id=shop.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-calendar-check me-1"></i>Quản lý lịch đặt
+            </a>
+            <a href="{{ url_for('shop_services', shop_id=shop.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-cut me-1"></i>Dịch vụ
+            </a>
+            <a href="{{ url_for('shop_barbers', shop_id=shop.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-users me-1"></i>Thợ cắt tóc
+            </a>
+            <a href="{{ url_for('all_conversations') }}" class="btn btn-outline-primary">
+                <i class="fas fa-comments me-1"></i>Tin nhắn khách hàng
+            </a>
+            <a href="{{ url_for('shop_profile', shop_id=shop.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-store-alt me-1"></i>Thông tin tiệm
+            </a>
+        </div>
+    </div>
+</div>

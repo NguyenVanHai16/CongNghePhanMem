@@ -1,1 +1,0 @@
-C:/Users/Asus/AppData/Local/Programs/Python/Python313/python.exe -m pip install flask-mail python-dotenv

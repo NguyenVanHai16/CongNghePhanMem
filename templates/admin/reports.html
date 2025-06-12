@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Báo cáo & Thống kê - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Admin Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-chart-line me-2"></i>Báo cáo & Thống kê
+                </h1>
+                <p class="text-muted mb-0">Xem báo cáo và thống kê hoạt động của hệ thống</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('admin_export_data') }}" class="btn btn-success">
+                <i class="fas fa-file-export me-1"></i>Xuất dữ liệu CSV
+            </a>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Tổng người dùng</h6>
+                    <h2 class="text-primary">{{ stats.total_users }}</h2>
+                    <div class="small text-muted mt-2">
+                        {{ stats.customer_count }} khách hàng<br>
+                        {{ stats.shop_owner_count }} chủ tiệm
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Tổng tiệm</h6>
+                    <h2 class="text-success">{{ stats.total_shops }}</h2>
+                    <div class="small text-muted mt-2">
+                        {{ stats.approved_shops }} đã phê duyệt<br>
+                        {{ stats.total_shops - stats.approved_shops }} chờ phê duyệt
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Tổng lịch đặt</h6>
+                    <h2 class="text-info">{{ stats.total_bookings }}</h2>
+                    <div class="small text-muted mt-2">
+                        Trung bình {{ (stats.total_bookings / stats.total_shops)|round(1) if stats.total_shops > 0 else 0 }} lịch/tiệm
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Tỷ lệ phê duyệt</h6>
+                    <h2 class="text-warning">
+                        {% if stats.total_shops > 0 %}
+                            {{ "%.0f"|format((stats.approved_shops / stats.total_shops) * 100) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </h2>
+                    <div class="small text-muted mt-2">
+                        {{ stats.approved_shops }} / {{ stats.total_shops }} tiệm
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Lịch đặt trong 30 ngày qua</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="bookingsChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Top tiệm cắt tóc</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="topShopsChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Services -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Dịch vụ phổ biến nhất</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tên dịch vụ</th>
+                                    <th>Tiệm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượt đặt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in stats.top_services %}
+                                <tr>
+                                    <td>{{ service.name }}</td>
+                                    <td>{{ service.shop_name }}</td>
+                                    <td>{{ "{:,.0f}".format(service.price) }} VNĐ</td>
+                                    <td>{{ service.booking_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Bookings Chart
+    const bookingsCtx = document.getElementById('bookingsChart').getContext('2d');
+    const bookingsChart = new Chart(bookingsCtx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for date, count in stats.bookings_by_date %}
+                    '{{ date.strftime("%d/%m") }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Số lượt đặt lịch',
+                data: [
+                    {% for date, count in stats.bookings_by_date %}
+                        {{ count }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // Top Shops Chart
+    const topShopsCtx = document.getElementById('topShopsChart').getContext('2d');
+    const topShopsChart = new Chart(topShopsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for shop in stats.top_shops %}
+                    '{{ shop.name }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for shop in stats.top_shops %}
+                        {{ shop.booking_count }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}
+

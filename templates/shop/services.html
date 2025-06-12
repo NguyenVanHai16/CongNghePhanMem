@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý dịch vụ - {{ shop.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="shop-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-cut me-2"></i>Quản lý dịch vụ
+                </h1>
+                <p class="text-muted mb-0">Quản lý các dịch vụ của tiệm {{ shop.name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                <i class="fas fa-plus me-1"></i>Thêm dịch vụ mới
+            </button>
+            <a href="{{ url_for('shop_dashboard') }}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Services List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Danh sách dịch vụ</h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary">{{ services|length }} dịch vụ</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if services %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="5%">#</th>
+                                <th width="25%">Tên dịch vụ</th>
+                                <th width="15%">Giá (VNĐ)</th>
+                                <th width="15%">Thời gian (phút)</th>
+                                <th width="25%">Mô tả</th>
+                                <th width="15%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ service.name }}</td>
+                                <td>{{ service.price|format_currency }}</td>
+                                <td>{{ service.duration }}</td>
+                                <td>{{ service.description }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editServiceModal{{ service.id }}">
+                                        <i class="fas fa-edit me-1"></i>Sửa
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteServiceModal{{ service.id }}">
+                                        <i class="fas fa-trash me-1"></i>Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center">Không có dịch vụ nào.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addServiceModalLabel">Thêm dịch vụ mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('shop_edit', shop_id=shop.id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="serviceName" class="form-label">Tên dịch vụ</label>
+                        <input type="text" class="form-control" id="serviceName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="servicePrice" class="form-label">Giá (VNĐ)</label>
+                        <input type="number" class="form-control" id="servicePrice" name="price" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceDuration" class="form-label">Thời gian (phút)</label>
+                        <input type="number" class="form-control" id="serviceDuration" name="duration" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="serviceDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" name="action" value="add">
+                    <button type="submit" class="btn btn-primary">Thêm dịch vụ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Service Modal -->
+{% for service in services %}
+<div class="modal fade" id="editServiceModal{{ service.id }}" tabindex="-1" aria-labelledby="editServiceModalLabel{{ service.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editServiceModalLabel{{ service.id }}">Sửa dịch vụ: {{ service.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('shop_edit', shop_id=shop.id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="serviceName{{ service.id }}" class="form-label">Tên dịch vụ</label>
+                        <input type="text" class="form-control" id="serviceName{{ service.id }}" name="name" value="{{ service.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="servicePrice{{ service.id }}" class="form-label">Giá (VNĐ)</label>
+                        <input type="number" class="form-control" id="servicePrice{{ service.id }}" name="price" value="{{ service.price }}" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceDuration{{ service.id }}" class="form-label">Thời gian (phút)</label>
+                        <input type="number" class="form-control" id="serviceDuration{{ service.id }}" name="duration" value="{{ service.duration }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceDescription{{ service.id }}" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="serviceDescription{{ service.id }}" name="description" rows="3">{{ service.description }}</textarea>
+                    </div>
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="service_id" value="{{ service.id }}">
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Delete Service Modal -->
+{% for service in services %}
+<div class="modal fade" id="deleteServiceModal{{ service.id }}" tabindex="-1" aria-labelledby="deleteServiceModalLabel{{ service.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteServiceModalLabel{{ service.id }}">Xóa dịch vụ: {{ service.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa dịch vụ "{{ service.name }}" không?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form action="{{ url_for('shop_edit', shop_id=shop.id) }}" method="post" style="display:inline;">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="service_id" value="{{ service.id }}">
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+

@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý khuyến mãi - {{ shop.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="shop-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-percent me-2"></i>Quản lý khuyến mãi
+                </h1>
+                <p class="text-muted mb-0">Quản lý các chương trình khuyến mãi của tiệm {{ shop.name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Promotion Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPromotionModal">
+                <i class="fas fa-plus me-2"></i>Thêm khuyến mãi mới
+            </button>
+            <a href="{{ url_for('shop_dashboard', shop_id=shop.id) }}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Promotions List -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Danh sách khuyến mãi</h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-primary">{{ promotions|length }} khuyến mãi</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if promotions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="5%">#</th>
+                                <th width="20%">Tên khuyến mãi</th>
+                                <th width="15%">Giảm giá</th>
+                                <th width="15%">Thời gian</th>
+                                <th width="15%">Trạng thái</th>
+                                <th width="15%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for promotion in promotions %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <strong>{{ promotion.name }}</strong>
+                                    {% if promotion.description %}
+                                    <br><small class="text-muted">{{ promotion.description }}</small>
+                                    {% endif %}
+                                </td>
+                                <td><span class="text-danger fw-bold">-{{ promotion.discount_percent }}%</span></td>
+                                <td>
+                                    {{ promotion.start_date.strftime('%d/%m/%Y') }} - {{ promotion.end_date.strftime('%d/%m/%Y') }}
+                                </td>
+                                <td>
+                                    {% if promotion.is_active %}
+                                        {% if promotion.start_date <= today and promotion.end_date >= today %}
+                                            <span class="badge bg-success">Đang diễn ra</span>
+                                        {% elif promotion.start_date > today %}
+                                            <span class="badge bg-info">Sắp diễn ra</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Đã kết thúc</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-danger">Đã hủy</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editPromotionModal{{ promotion.id }}">
+                                        <i class="fas fa-edit me-1"></i>Sửa
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePromotionModal{{ promotion.id }}">
+                                        <i class="fas fa-trash me-1"></i>Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Edit Promotion Modals -->
+                {% for promotion in promotions %}
+                <div class="modal fade" id="editPromotionModal{{ promotion.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Chỉnh sửa khuyến mãi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="{{ url_for('edit_promotion', promotion_id=promotion.id) }}" method="post">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="name{{ promotion.id }}" class="form-label">Tên khuyến mãi</label>
+                                        <input type="text" class="form-control" id="name{{ promotion.id }}" name="name" value="{{ promotion.name }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="description{{ promotion.id }}" class="form-label">Mô tả</label>
+                                        <textarea class="form-control" id="description{{ promotion.id }}" name="description" rows="3">{{ promotion.description }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="discount_percent{{ promotion.id }}" class="form-label">Phần trăm giảm giá (%)</label>
+                                        <input type="number" class="form-control" id="discount_percent{{ promotion.id }}" name="discount_percent" min="1" max="100" value="{{ promotion.discount_percent }}" required>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="start_date{{ promotion.id }}" class="form-label">Ngày bắt đầu</label>
+                                            <input type="date" class="form-control" id="start_date{{ promotion.id }}" name="start_date" value="{{ promotion.start_date.strftime('%Y-%m-%d') }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="end_date{{ promotion.id }}" class="form-label">Ngày kết thúc</label>
+                                            <input type="date" class="form-control" id="end_date{{ promotion.id }}" name="end_date" value="{{ promotion.end_date.strftime('%Y-%m-%d') }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="is_active{{ promotion.id }}" name="is_active" {% if promotion.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="is_active{{ promotion.id }}">
+                                            Kích hoạt khuyến mãi
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delete Promotion Modal -->
+                <div class="modal fade" id="deletePromotionModal{{ promotion.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Xác nhận xóa</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Bạn có chắc chắn muốn xóa khuyến mãi <strong>{{ promotion.name }}</strong>?</p>
+                                <p class="text-danger">Hành động này không thể hoàn tác!</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <a href="{{ url_for('delete_promotion', promotion_id=promotion.id) }}" class="btn btn-danger">Xóa</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-tags text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted mt-3">Chưa có khuyến mãi nào. Hãy thêm khuyến mãi đầu tiên!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Promotion Modal -->
+<div class="modal fade" id="addPromotionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm khuyến mãi mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('add_promotion', shop_id=shop.id) }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Tên khuyến mãi</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="discount_percent" class="form-label">Phần trăm giảm giá (%)</label>
+                        <input type="number" class="form-control" id="discount_percent" name="discount_percent" min="1" max="100" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">Ngày bắt đầu</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">Ngày kết thúc</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm khuyến mãi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Set default dates for new promotion
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const nextMonth = new Date();
+        nextMonth.setMonth(today.getMonth() + 1);
+        
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        
+        if (startDateInput && endDateInput) {
+            startDateInput.valueAsDate = today;
+            endDateInput.valueAsDate = nextMonth;
+        }
+    });
+</script>
+{% endblock %}

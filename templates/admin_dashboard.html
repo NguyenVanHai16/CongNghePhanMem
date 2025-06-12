@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - BarberShop TNUT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Admin Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header p-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-cog me-2"></i>Bảng điều khiển Admin
+                </h1>
+                <p class="text-muted mb-0">Quản lý hệ thống tiệm cắt tóc TNUT</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Functions -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="admin-function-icon mb-3">
+                        <i class="fas fa-users fa-3x text-primary"></i>
+                    </div>
+                    <h5>Quản lý người dùng</h5>
+                    <p class="text-muted small">Quản lý tài khoản người dùng trong hệ thống</p>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-primary btn-sm mt-2">
+                        <i class="fas fa-arrow-right me-1"></i>Truy cập
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="admin-function-icon mb-3">
+                        <i class="fas fa-store fa-3x text-success"></i>
+                    </div>
+                    <h5>Quản lý tiệm</h5>
+                    <p class="text-muted small">Quản lý các tiệm cắt tóc trong hệ thống</p>
+                    <a href="{{ url_for('admin_shops') }}" class="btn btn-success btn-sm mt-2">
+                        <i class="fas fa-arrow-right me-1"></i>Truy cập
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="admin-function-icon mb-3">
+                        <i class="fas fa-calendar-check fa-3x text-info"></i>
+                    </div>
+                    <h5>Quản lý đặt lịch</h5>
+                    <p class="text-muted small">Xem và quản lý các lịch đặt trong hệ thống</p>
+                    <a href="{{ url_for('admin_bookings') }}" class="btn btn-info btn-sm mt-2">
+                        <i class="fas fa-arrow-right me-1"></i>Truy cập
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="admin-function-icon mb-3">
+                        <i class="fas fa-chart-line fa-3x text-warning"></i>
+                    </div>
+                    <h5>Báo cáo & Thống kê</h5>
+                    <p class="text-muted small">Xem báo cáo và thống kê hoạt động</p>
+                    <a href="{{ url_for('admin_reports') }}" class="btn btn-warning btn-sm mt-2">
+                        <i class="fas fa-arrow-right me-1"></i>Truy cập
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card text-center p-4">
+                <div class="stat-icon mb-3">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h4>{{ stats.total_shops }}</h4>
+                <p class="text-muted mb-0">Tổng cửa hàng</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card text-center p-4">
+                <div class="stat-icon mb-3">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h4>{{ stats.approved_shops }}</h4>
+                <p class="text-muted mb-0">Đã phê duyệt</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card text-center p-4">
+                <div class="stat-icon mb-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>{{ stats.total_users }}</h4>
+                <p class="text-muted mb-0">Khách hàng</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card text-center p-4">
+                <div class="stat-icon mb-3">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h4>{{ stats.total_bookings }}</h4>
+                <p class="text-muted mb-0">Lượt đặt lịch</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Approvals -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Cửa hàng chờ phê duyệt
+                    </h5>
+                    <span class="badge bg-warning">{{ pending_shops|length }} cửa hàng</span>
+                </div>
+                <div class="card-body">
+                    {% if pending_shops %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Tên cửa hàng</th>
+                                        <th>Chủ cửa hàng</th>
+                                        <th>Địa chỉ</th>
+                                        <th>Khoảng cách</th>
+                                        <th>Ngày đăng ký</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for shop in pending_shops %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ shop.name }}</strong><br>
+                                                <small class="text-muted">{{ shop.phone }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <strong>{{ shop.owner.full_name }}</strong><br>
+                                                <small class="text-muted">{{ shop.owner.email }}</small>
+                                            </div>
+                                        </td>
+                                        <td>{{ shop.address }}</td>
+                                        <td>
+                                            {% if shop.distance_from_university %}
+                                                <span class="badge bg-primary">{{ "%.1f"|format(shop.distance_from_university) }}km</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Chưa xác định</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ shop.created_at.strftime('%d/%m/%Y') }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('shop_detail', shop_id=shop.id) }}" 
+                                                   class="btn btn-sm btn-outline-info" 
+                                                   title="Xem chi tiết">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('approve_shop', shop_id=shop.id) }}" 
+                                                   class="btn btn-sm btn-success" 
+                                                   title="Phê duyệt"
+                                                   onclick="return confirm('Bạn có chắc muốn phê duyệt cửa hàng này?')">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="{{ url_for('reject_shop', shop_id=shop.id) }}" 
+                                                   class="btn btn-sm btn-danger" 
+                                                   title="Từ chối"
+                                                   onclick="return confirm('Bạn có chắc muốn từ chối cửa hàng này?')">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="text-muted">Không có cửa hàng nào đang chờ phê duyệt</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto refresh every 5 minutes
+setInterval(function() {
+    // Only refresh if there are pending shops
+    if ({{ pending_shops|length }} > 0) {
+        window.location.reload();
+    }
+}, 300000); // 5 minutes
+</script>
+{% endblock %}

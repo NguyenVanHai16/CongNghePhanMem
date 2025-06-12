@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold text-white mb-4">
+                        Tìm tiệm cắt tóc tốt nhất <br>
+                        <span class="text-warning">quanh TNUT</span>
+                    </h1>
+                    <p class="lead text-white-50 mb-4">
+                        Đặt lịch cắt tóc dễ dàng tại các tiệm uy tín trong bán kính 5km từ Đại học Kỹ thuật Công nghiệp Thái Nguyên
+                    </p>
+                    {% if not current_user.is_authenticated %}
+                        <div class="d-flex gap-3">
+                            <a href="{{ url_for('register') }}" class="btn btn-warning btn-lg px-4">
+                                <i class="fas fa-user-plus me-2"></i>Đăng ký ngay
+                            </a>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">
+                                <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Barber shop illustration -->
+                        <rect x="50" y="100" width="300" height="150" fill="#FFD700" stroke="#333" stroke-width="2"/>
+                        <rect x="70" y="120" width="80" height="80" fill="#87CEEB" stroke="#333" stroke-width="2"/>
+                        <rect x="170" y="120" width="80" height="80" fill="#87CEEB" stroke="#333" stroke-width="2"/>
+                        <rect x="270" y="120" width="60" height="80" fill="#8B4513" stroke="#333" stroke-width="2"/>
+                        
+                        <!-- Barber pole -->
+                        <rect x="30" y="80" width="15" height="100" fill="#FF0000"/>
+                        <rect x="30" y="85" width="15" height="10" fill="#FFFFFF"/>
+                        <rect x="30" y="105" width="15" height="10" fill="#0000FF"/>
+                        <rect x="30" y="125" width="15" height="10" fill="#FFFFFF"/>
+                        <rect x="30" y="145" width="15" height="10" fill="#FF0000"/>
+                        <rect x="30" y="165" width="15" height="10" fill="#FFFFFF"/>
+                        
+                        <!-- Sign -->
+                        <rect x="100" y="60" width="200" height="40" fill="#333"/>
+                        <text x="200" y="85" text-anchor="middle" fill="#FFD700" font-size="18" font-weight="bold">BARBERSHOP</text>
+                        
+                        <!-- Scissors icon -->
+                        <g transform="translate(320, 40)">
+                            <path d="M10 10 L20 20 M20 10 L10 20" stroke="#333" stroke-width="2" fill="none"/>
+                            <circle cx="8" cy="8" r="3" fill="#FFD700"/>
+                            <circle cx="22" cy="22" r="3" fill="#FFD700"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container py-5">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2 class="display-5 fw-bold">Tại sao chọn chúng tôi?</h2>
+            <p class="lead text-muted">Trải nghiệm đặt lịch cắt tóc hiện đại và tiện lợi</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h4>Gần TNUT</h4>
+                <p class="text-muted">Tất cả các tiệm đều nằm trong bán kính 5km từ trường, thuận tiện cho sinh viên</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h4>Đặt lịch dễ dàng</h4>
+                <p class="text-muted">Chọn thời gian, dịch vụ và thợ cắt tóc yêu thích chỉ với vài cú click</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h4>Chất lượng đảm bảo</h4>
+                <p class="text-muted">Chỉ các tiệm uy tín được kiểm duyệt mới có mặt trên hệ thống</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Shops -->
+{% if shops %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold">Tiệm cắt tóc phổ biến</h2>
+            <p class="text-muted">Các tiệm được yêu thích nhất gần TNUT</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for shop in shops %}
+        <div class="col-md-6 col-lg-4">
+            <div class="shop-card h-100">
+                <div class="shop-card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="shop-name">{{ shop.name }}</h5>
+                        {% if shop.distance_from_university %}
+                        <span class="badge bg-primary">{{ "%.1f"|format(shop.distance_from_university) }}km</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ shop.address }}
+                    </p>
+                    
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-phone me-2"></i>{{ shop.phone }}
+                    </p>
+                    
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-clock me-2"></i>
+                        {{ shop.opening_time.strftime('%H:%M') }} - {{ shop.closing_time.strftime('%H:%M') }}
+                    </p>
+                    
+                    {% if shop.description %}
+                    <p class="shop-description">{{ shop.description[:100] }}{% if shop.description|length > 100 %}...{% endif %}</p>
+                    {% endif %}
+                    
+                    <div class="mt-auto">
+                        <a href="{{ url_for('shop_detail', shop_id=shop.id) }}" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-info-circle me-1"></i>Chi tiết
+                        </a>
+                        {% if current_user.is_authenticated and current_user.role == 'customer' %}
+                        <a href="{{ url_for('create_booking', shop_id=shop.id) }}" class="btn btn-primary btn-sm">
+                            Đặt lịch
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- CTA Section -->
+{% if not current_user.is_authenticated %}
+<div class="cta-section py-5">
+    <div class="container text-center">
+        <h2 class="text-white mb-4">Bạn là chủ tiệm cắt tóc?</h2>
+        <p class="text-white-50 mb-4">Tham gia hệ thống để tiếp cận thêm nhiều khách hàng gần TNUT</p>
+        <a href="{{ url_for('register') }}" class="btn btn-warning btn-lg">
+            <i class="fas fa-store me-2"></i>Đăng ký làm chủ tiệm
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+

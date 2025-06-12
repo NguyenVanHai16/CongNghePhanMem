@@ -1,0 +1,1 @@
+C:/Users/Asus/AppData/Local/Programs/Python/Python313/python.exe -m pip install flask-login flask flask-sqlalchemy flask-dance email-validator gunicorn psycopg2-binary oauthlib pyjwt
